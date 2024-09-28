@@ -56,7 +56,7 @@ jobs:
         run: make dup
 
       - name: Install Composer Dependencies
-        run: docker exec php bash -c "composer install --no-dev --optimize-autoloader --ignore-platform-reqs"
+        run: docker exec php bash -c "composer install --optimize-autoloader --ignore-platform-reqs"
 
       - name: Clear Config Cache
         run: docker exec php bash -c "php artisan config:clear"
