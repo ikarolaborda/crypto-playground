@@ -45,7 +45,7 @@ jobs:
       - name: Build and Run Containers
         run: make dup
 
-      - name: Install Composer Dependencies
+      - name: Install Composer Dependencies (Via https)
         run: |
           mkdir -p /tmp/composer
           export COMPOSER_HOME=/tmp/composer
