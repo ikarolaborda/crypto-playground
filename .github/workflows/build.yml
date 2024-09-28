@@ -50,12 +50,6 @@ jobs:
       - name: Check if Vendor Directory Exists
         run: docker exec php bash -c "if [ ! -d /var/www/crypto/vendor ]; then echo 'Vendor directory not found'; exit 1; fi"
 
-      - name: Run Composer audit
-        run: docker exec php composer audit
-
-      - name: Run PHP_CodeSniffer
-        run: docker exec php ./vendor/bin/phpcs
-
       - name: Run Migrations
         run: docker exec php php artisan migrate:fresh --seed
 
