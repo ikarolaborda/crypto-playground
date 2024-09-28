@@ -56,7 +56,7 @@ jobs:
         run: make dup
 
       - name: Install Composer Dependencies
-        run: docker exec php bash -c "composer install"
+        run: docker exec php bash -c "composer install --no-dev --optimize-autoloader"
 
       - name: Run Migrations
         run: docker exec php bash -c "php artisan migrate:fresh --seed"
