@@ -55,12 +55,6 @@ jobs:
       - name: Build and Run Containers
         run: make dup
 
-      - name: Clear Config Cache
-        run: docker exec php bash -c "php artisan config:clear"
-
-      - name: Clear Application Cache
-        run: docker exec php bash -c "php artisan cache:clear"
-
       - name: Run Migrations
         run: docker exec php bash -c "php artisan migrate:fresh --seed"
 
