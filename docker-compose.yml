@@ -14,7 +14,7 @@ services:
       - mysql-data:/var/lib/mysql
     networks:
       - crypto-dev
-  
+
   crypto-php:
     platform: linux/amd64
     container_name: php
@@ -31,7 +31,7 @@ services:
       - database
     networks:
       - crypto-dev
-  
+
   nginx:
     platform: linux/amd64
     container_name: nginx
@@ -45,7 +45,7 @@ services:
       - crypto-php
     networks:
       - crypto-dev
-  
+
   phpmyadmin:
     platform: linux/amd64
     container_name: pma
@@ -65,13 +65,13 @@ services:
       - nginx
     networks:
       - crypto-dev
-  
+
   redis:
     platform: linux/amd64
     container_name: redis
     image: 'redis:alpine'
     ports:
-      - '${FORWARD_REDIS_PORT:-6379}:6379'
+      - '${FORWARD_REDIS_PORT:-6380}:6379'
     volumes:
       - redis-data:/data
     healthcheck:
