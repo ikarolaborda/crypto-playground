@@ -55,11 +55,14 @@ jobs:
       - name: Build and Run Containers
         run: make dup
 
+      - name: Check if Vendor Directory Exists
+        run: docker exec crypto-php bash -c "if [ ! -d /var/www/crypto/vendor ]; then echo 'Vendor directory not found'; exit 1; fi"
+
       - name: Run Migrations
-        run: docker exec php bash -c "php artisan migrate:fresh --seed"
+        run: docker exec crypto-php bash -c "php artisan migrate:fresh --seed"
 
       - name: Run Unit Tests
-        run: docker exec php bash -c "php artisan test"
+        run: docker exec crypto-php bash -c "php artisan test"
 
       - name: Stop Docker Containers
         run: make ddw
