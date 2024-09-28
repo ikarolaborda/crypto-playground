@@ -9,7 +9,7 @@ services:
       MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - '4306:3306'
+      - '33060:3306'
     volumes:
       - mysql-data:/var/lib/mysql
     networks:
@@ -58,7 +58,7 @@ services:
       PMA_ARBITRARY: 1
     restart: always
     ports:
-      - '8083:80'
+      - '9083:80'
     depends_on:
       - database
       - crypto-php
