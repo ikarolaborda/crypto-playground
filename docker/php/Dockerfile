@@ -16,7 +16,10 @@ WORKDIR /var/www/crypto
 
 RUN mkdir -p /tmp && chmod 777 /tmp
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Install Composer 1.10.22
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php composer-setup.php --version=1.10.22 --install-dir=/usr/local/bin --filename=composer \
+    && php -r "unlink('composer-setup.php');"
 
 COPY --chmod=755 entrypoint.sh /usr/local/bin/
 
