@@ -56,10 +56,10 @@ jobs:
         run: make dup
 
       - name: Run Migrations
-        run: docker exec -it php bash -c "php artisan migrate:fresh --seed"
+        run: docker exec php bash -c "php artisan migrate:fresh --seed"
 
       - name: Run Unit Tests
-        run: docker exec -it php bash -c "php artisan test"
+        run: docker exec php bash -c "php artisan test"
 
       - name: Stop Docker Containers
         run: make ddw
