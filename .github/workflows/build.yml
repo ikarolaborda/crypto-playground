@@ -1,13 +1,3 @@
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -56,7 +46,11 @@ jobs:
         run: make dup
 
       - name: Install Composer Dependencies
-        run: docker exec php bash -c "composer install --optimize-autoloader --ignore-platform-reqs"
+        run: |
+          mkdir -p /tmp/composer
+          export COMPOSER_HOME=/tmp/composer
+          docker exec php bash -c "composer config --global github-protocols https"
+          docker exec php bash -c "composer install --optimize-autoloader --ignore-platform-reqs"
 
       - name: Clear Config Cache
         run: docker exec php bash -c "php artisan config:clear"
