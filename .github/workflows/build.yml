@@ -12,31 +12,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_ROOT_PASSWORD: cr1pt0D0m3
-          MYSQL_DATABASE: crypto
-          MYSQL_PASSWORD: cr1pt0D0m3
-        ports:
-          - 4306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
-      redis:
-        image: redis:alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd="redis-cli ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -52,17 +27,39 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      - name: Copy .env file
+        run: cp .env.example .env
+
+      - name: Validate docker-compose file
+        run: docker-compose config
+
       - name: Build and Run Containers
-        run: make dup
+        run: docker-compose up -d --build
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+
+      - name: Wait for containers to be ready
+        run: |
+          echo "Waiting for containers to be ready..."
+          sleep 30
+
+      - name: Install Composer dependencies
+        run: docker exec php composer install --no-interaction --no-progress --prefer-dist
 
       - name: Check if Vendor Directory Exists
-        run: docker exec crypto-php bash -c "if [ ! -d /var/www/crypto/vendor ]; then echo 'Vendor directory not found'; exit 1; fi"
+        run: docker exec php bash -c "if [ ! -d /var/www/crypto/vendor ]; then echo 'Vendor directory not found'; exit 1; fi"
 
       - name: Run Migrations
-        run: docker exec crypto-php bash -c "php artisan migrate:fresh --seed"
+        run: docker exec php php artisan migrate:fresh --seed
 
-      - name: Run Unit Tests
-        run: docker exec crypto-php bash -c "php artisan test"
+      - name: Run PHPUnit tests
+        run: docker exec php php artisan test --coverage-clover=coverage.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./coverage.xml
 
       - name: Stop Docker Containers
-        run: make ddw
+        run: docker-compose down
