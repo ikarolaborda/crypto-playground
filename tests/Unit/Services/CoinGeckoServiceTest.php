@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 use App\Services\CoinGeckoService;
 use GuzzleHttp\Client;
@@ -13,6 +14,13 @@ class CoinGeckoServiceTest extends TestCase
 {
     public function testGetCurrentPriceReturnsPrice(): void
     {
+
+        // We set the cache to array for test purposes
+        Cache::shouldReceive('remember')
+            ->andReturnUsing(function ($key, $ttl, $callback) {
+                return $callback();
+            });
+
         $coinId = 'bitcoin';
         $expectedPrice = 50000.00;
 

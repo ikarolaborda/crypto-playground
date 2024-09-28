@@ -7,6 +7,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use http\Env;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class CoinGeckoService implements CoinServiceInterface
@@ -33,61 +34,82 @@ class CoinGeckoService implements CoinServiceInterface
 
     public function getCurrentPrice(string $coinId): float
     {
-        try {
-            $response = $this->client->get("coins/{$coinId}", [
-                'query' => [
-                    'localization' => 'false',
-                    'tickers' => 'false',
-                    'market_data' => 'true',
-                    'community_data' => 'false',
-                    'developer_data' => 'false',
-                    'sparkline' => 'false',
-                ],
-            ]);
+        $cacheKey = "coin_price_{$coinId}_current";
+        $cacheTTL = 300; // Cache for 5 minutes
 
-            $data = json_decode($response->getBody()->getContents(), true);
+        return Cache::remember($cacheKey, $cacheTTL, function () use ($coinId) {
+            try {
+                $response = $this->client->get("coins/{$coinId}", [
+                    'query' => [
+                        'localization' => 'false',
+                        'tickers' => 'false',
+                        'market_data' => 'true',
+                        'community_data' => 'false',
+                        'developer_data' => 'false',
+                        'sparkline' => 'false',
+                    ],
+                ]);
 
-            return $data['market_data']['current_price']['usd'] ?? 0.0;
-        } catch (RequestException $e) {
-            Log::error("Error fetching current price: {$e->getMessage()}");
-            return 0.0;
-        } catch (GuzzleException $e) {
-            Log::error("Error fetching current price: {$e->getMessage()}");
-            return 0.0;
-        }
+                $data = json_decode($response->getBody()->getContents(), true);
+
+                return $data['market_data']['current_price']['usd'] ?? 0.0;
+            } catch (RequestException $e) {
+                Log::error("Error fetching current price: {$e->getMessage()}");
+                return 0.0;
+            } catch (GuzzleException $e) {
+                Log::error("Error fetching current price: {$e->getMessage()}");
+                return 0.0;
+            }
+        });
     }
 
     public function getHistoricalPrice(string $coinId, string $date): float
     {
-        try {
-            $response = $this->client->get("coins/{$coinId}/history", [
-                'query' => [
-                    'date' => $date, // Format: dd-mm-yyyy
-                    'localization' => 'false',
-                ],
-            ]);
+        $cacheKey = "coin_price_{$coinId}_{$date}_historical";
+        $cacheTTL = 86400; // Cache for 24 hours
 
-            $data = json_decode($response->getBody()->getContents(), true);
+        return Cache::remember($cacheKey, $cacheTTL, function () use ($coinId, $date) {
+            try {
+                $response = $this->client->get("coins/{$coinId}/history", [
+                    'query' => [
+                        'date' => $date, // Format: dd-mm-yyyy
+                        'localization' => 'false',
+                    ],
+                ]);
 
-            return $data['market_data']['current_price']['usd'] ?? 0.0;
-        } catch (RequestException $e) {
-            Log::error("Error fetching historical price: {$e->getMessage()}");
-            return 0.0;
-        }
+                $data = json_decode($response->getBody()->getContents(), true);
+
+                return $data['market_data']['current_price']['usd'] ?? 0.0;
+            } catch (RequestException $e) {
+                Log::error("Error fetching historical price: {$e->getMessage()}");
+                return 0.0;
+            } catch (GuzzleException $e) {
+                Log::error("Error fetching historical price: {$e->getMessage()}");
+                return 0.0;
+            }
+        });
     }
 
     public function getExchangeRates(): array
     {
-        try {
-            $response = $this->client->get('exchange_rates');
+        $cacheKey = "exchange_rates";
+        $cacheTTL = 3600; // Cache for 1 hour
 
-            $data = json_decode($response->getBody()->getContents(), true);
+        return Cache::remember($cacheKey, $cacheTTL, function () {
+            try {
+                $response = $this->client->get('exchange_rates');
 
-            return $data['rates'] ?? [];
-        } catch (RequestException $e) {
-            Log::error("Error fetching exchange rates: {$e->getMessage()}");
-            return [];
-        }
+                $data = json_decode($response->getBody()->getContents(), true);
+
+                return $data['rates'] ?? [];
+            } catch (RequestException $e) {
+                Log::error("Error fetching exchange rates: {$e->getMessage()}");
+                return [];
+            } catch (GuzzleException $e) {
+                Log::error("Error fetching exchange rates: {$e->getMessage()}");
+                return [];
+            }
+        });
     }
 
 }
