@@ -55,6 +55,9 @@ jobs:
       - name: Build and Run Containers
         run: make dup
 
+      - name: Install Composer Dependencies
+        run: docker exec php bash -c "composer install"
+
       - name: Run Migrations
         run: docker exec php bash -c "php artisan migrate:fresh --seed"
 
