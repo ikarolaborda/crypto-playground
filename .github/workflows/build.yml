@@ -37,7 +37,6 @@ jobs:
           sleep 30
 
       - name: Install Composer dependencies
-        with:
         run: docker exec php composer clear-cache && composer install --no-interaction --no-progress --prefer-dist
 
       - name: Check if Vendor Directory Exists
