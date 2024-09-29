@@ -38,7 +38,6 @@ jobs:
 
       - name: Install Composer dependencies
         with:
-          php-version: 7.4
         run: docker exec php composer clear-cache && composer install --no-interaction --no-progress --prefer-dist
 
       - name: Check if Vendor Directory Exists
