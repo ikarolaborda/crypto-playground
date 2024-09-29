@@ -40,18 +40,6 @@ jobs:
       - name: Check Composer version
         run: docker exec php composer --version
 
-      - name: Set permissions
-        run: |
-          docker exec php chown -R www-data:www-data /var/www/crypto
-          docker exec php chmod -R 775 /var/www/crypto
-
-      - name: Install Composer dependencies
-        run: |
-          # Set Composer cache directory to a writable location
-          docker exec php composer config --global cache-dir /tmp/composer-cache
-          docker exec php bash -c "export COMPOSER_MEMORY_LIMIT=-1 && composer clear-cache && composer install --no-interaction --no-progress --prefer-dist"
-
-
       - name: Check if Vendor Directory Exists
         run: docker exec php bash -c "if [ ! -d /var/www/crypto/vendor ]; then echo 'Vendor directory not found'; exit 1; fi"
 
