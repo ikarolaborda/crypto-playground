@@ -2,25 +2,25 @@
 
 namespace Tests\Unit\Services;
 
-use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 use App\Services\CoinGeckoService;
-use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use Mockery;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
+use Illuminate\Support\Facades\Cache;
 
 class CoinGeckoServiceTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['cache.default' => 'array']);
+        Cache::flush();
+    }
+
     public function testGetCurrentPriceReturnsPrice(): void
     {
-
-        // We set the cache to array for test purposes
-        Cache::shouldReceive('remember')
-            ->andReturnUsing(function ($key, $ttl, $callback) {
-                return $callback();
-            });
-
         $coinId = 'bitcoin';
         $expectedPrice = 50000.00;
 
@@ -41,11 +41,17 @@ class CoinGeckoServiceTest extends TestCase
             ->andReturn($mockStream);
 
         // Mock the Guzzle Client
-        $mockClient = Mockery::mock(Client::class);
+        $mockClient = Mockery::mock(ClientInterface::class);
         $mockClient->shouldReceive('get')
             ->once()
             ->with("coins/{$coinId}", Mockery::any())
             ->andReturn($mockResponse);
+
+        // Mock the Cache::remember method to execute the closure
+        Cache::shouldReceive('remember')
+            ->andReturnUsing(function ($key, $ttl, $closure) {
+                return $closure();
+            });
 
         $service = new CoinGeckoService($mockClient);
         $price = $service->getCurrentPrice($coinId);
