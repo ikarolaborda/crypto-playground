@@ -31,13 +31,24 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_DATABASE: ${{ secrets.DB_DATABASE }}
 
-      - name: Wait for containers to be ready
+      - name: Check Docker containers
+        run: docker ps -a
+
+      - name: Check PHP version in container
+        run: docker exec php php -v
+
+      - name: Check Composer version
+        run: docker exec php composer --version
+
+      - name: Set permissions
         run: |
-          echo "Waiting for containers to be ready..."
-          sleep 30
+          docker exec php chown -R www-data:www-data /var/www/crypto
+          docker exec php chmod -R 775 /var/www/crypto
 
       - name: Install Composer dependencies
-        run: docker exec php composer clear-cache && docker exec php composer install --no-interaction --no-progress --prefer-dist
+        run: |
+          docker exec php composer clear-cache
+          docker exec php composer install --no-interaction --no-progress --prefer-dist
 
       - name: Check if Vendor Directory Exists
         run: docker exec php bash -c "if [ ! -d /var/www/crypto/vendor ]; then echo 'Vendor directory not found'; exit 1; fi"
