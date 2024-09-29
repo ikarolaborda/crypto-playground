@@ -19,14 +19,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
       - name: Copy .env file
         run: cp .env.example .env
 
@@ -45,6 +37,8 @@ jobs:
           sleep 30
 
       - name: Install Composer dependencies
+        with:
+          php-version: 7.4
         run: docker exec php composer clear-cache && composer install --no-interaction --no-progress --prefer-dist
 
       - name: Check if Vendor Directory Exists
