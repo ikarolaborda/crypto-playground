@@ -37,7 +37,7 @@ jobs:
           sleep 30
 
       - name: Install Composer dependencies
-        run: docker exec php composer clear-cache && docker-exec php composer install --no-interaction --no-progress --prefer-dist
+        run: docker exec php composer clear-cache && docker exec php composer install --no-interaction --no-progress --prefer-dist
 
       - name: Check if Vendor Directory Exists
         run: docker exec php bash -c "if [ ! -d /var/www/crypto/vendor ]; then echo 'Vendor directory not found'; exit 1; fi"
